@@ -1,13 +1,7 @@
 # https://api.pygobject.gnome.org/Gio-2.0/
-from json import JSONDecodeError
 import gi
 gi.require_version("Gio", "2.0")
 from gi.repository import Gio, GLib
-import json
-
-def initialize_schema(directory: str, schema_id: str) -> Gio.SettingsSchema | None:
-    """Load a settings schema by ID from a directory."""
-    return Gio.SettingsSchemaSource.new_from_directory(directory, None, True).lookup(schema_id, False)
 
 def initialize_schema(schema_id: str) -> Gio.SettingsSchema | None:
     return Gio.SettingsSchemaSource.get_default().lookup(schema_id, False)

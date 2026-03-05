@@ -85,8 +85,9 @@ def list_keys():
     print("Settings:")
     for key in GLOBAL_KEYS:
         settings = schema.get_settings(SCHEMAS[0])
-        widgets = settings.get_value(key)
-        print(f'\t{key}:'.ljust(40) + str(widgets))
+        if settings != None:
+            widgets = settings.get_value(key)
+            print(f'\t{key}:'.ljust(40) + str(widgets))
 
 
     elements: list[dict]
@@ -107,6 +108,7 @@ def list_keys():
             print('\n\t\tindex:{}\tid:{}'.format(j, element_id))
 
             for key in ELEMENT_KEYS:
+
                 value = get_element_settings(element_id, widget_id).get_value(key)
                 print(f'\t\t\t{key}:'.ljust(40) + str(value))
 
@@ -126,13 +128,14 @@ def validate_schemas():
 
 def encode():
     result: dict = {}
-
     widgets: list[dict]
-
     settings = schema.get_settings(SCHEMAS[0])
 
-    widgets = settings.get_value('widgets')
+    if settings == None:
+        print("Failed to find settings while trying to encode into JSON")
+        return
 
+    widgets = settings.get_value('widgets')
     elements: list[dict]
 
     result['widgets'] = {}

@@ -166,7 +166,7 @@ class Dropdown(ttk.Combobox):
 
 
 class Path(tk.Frame):
-    def __init__(self, master, default: str = "~/", callback=None):
+    def __init__(self, master, default: str = "~/", callback=print):
         super().__init__(master)
         self.callback = callback
         self.directory = default

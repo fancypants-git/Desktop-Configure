@@ -124,7 +124,7 @@ def main():
 
 
 
-    theme_section = ui.Section(root, 'Desktop Theme', size='h1').pack()
+    theme_section = ui.Section(root, 'Desktop Theme', header_size='h1').pack()
 
     ui.Dropdown(theme_section, get_config_key('desktop-theme'), global_themes, lambda e, var: set_theme(var.get())).pack()
     ui.Label(theme_section, text='Themes Directory').pack(side='top')
@@ -132,7 +132,7 @@ def main():
 
 
 
-    clock_section = ui.Section(root, 'Clock Theme', size='h2', relief='solid').pack()
+    clock_section = ui.Section(root, 'Clock Theme', header_size='h2', relief='solid').pack()
 
     clock_callback = lambda e, var: set_clock(var.get(), True)
     clock_theme_dropdown = ui.Dropdown(clock_section, get_config_key('clock-theme'), clock_themes, clock_callback).pack()
@@ -145,9 +145,9 @@ def main():
 
 
 
-    wallpaper_section = ui.Section(root, 'Wallpaper Theme', size='h2', relief='solid').pack()
+    wallpaper_section = ui.Section(root, 'Wallpaper Theme', header_size='h2', relief='solid').pack()
 
-    wallpaper_callback = lambda e, var: set_wallpaper(var.get(), True).pack()
+    wallpaper_callback = lambda e, var: set_wallpaper(var.get(), True)
     wallpaper_theme_dropdown = ui.Dropdown(wallpaper_section, default=get_config_key('wallpaper-theme'),
                                            options=wallpaper_themes,
                                            callback=wallpaper_callback).pack()
