@@ -23,6 +23,12 @@ wallpaper_theme_dropdown: ui.Dropdown
 
 root: ui.Window
 
+# TODO: add initialize functionality to the presets, because the widget and other stuffs id are different.
+# 
+# read the clock and its elements' id
+# go through each theme that has a clock
+# update the IDs to match.
+
 
 def set_theme(theme_name: str):
     set_wallpaper(theme_name)
