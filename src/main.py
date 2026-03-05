@@ -147,7 +147,7 @@ def main():
 
     wallpaper_section = ui.Section(root, 'Wallpaper Theme', size='h2', relief='solid').pack()
 
-    wallpaper_callback = lambda e, var: set_wallpaper(var.get(), True).pack()
+    wallpaper_callback = lambda e, var: set_wallpaper(var.get(), True)
     wallpaper_theme_dropdown = ui.Dropdown(wallpaper_section, default=get_config_key('wallpaper-theme'),
                                            options=wallpaper_themes,
                                            callback=wallpaper_callback).pack()
