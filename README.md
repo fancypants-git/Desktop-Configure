@@ -33,14 +33,14 @@ To do this:
 1. open a terminal or file explorer
 2. navigate to "~/.local/share/gnome-shell/extensions" where you will find the downloaded extensions
 
-repeat the following steps (3 and 4) for "azclock@azclock.gitlab.com" and "azwallpaper@azwalpaper.gitlab.com"
+repeat the following steps (3 and 4) for "azclock@azclock.gitlab.com" and "azwallpaper@azwalpaper.gitlab.com"<br>
 3. open "\[EXTENSION]/schemas" and replace \[EXTENSION] with the names given above
     - if you opened this folder in a file explorer, right click and press "open in terminal"
 
-now you must copy the schemas to the system wide schemas folder and compile them
+now you must copy the schemas to the system wide schemas folder and compile them<br>
 4. type "sudo cp org.gnome.shell.extensions.\[EXTENSION].gschema.xml /usr/share/glib-2.0/schemas/" and replace \[EXTENSION]
 
-after you have done this for both extensions you must re-compile the glib schemas
+after you have done this for both extensions you must re-compile the glib schemas<br>
 5. do this by typing "sudo glib-compile-schemas /usr/share/glib-2.0/schemas"
 
 
