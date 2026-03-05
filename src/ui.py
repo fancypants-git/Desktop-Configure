@@ -1,48 +1,27 @@
 import subprocess, shutil
 import tkinter as tk
 from tkinter import ttk, filedialog, font
-from typing import Literal, Any, Mapping
+from typing import Literal
+
+from tkinter.ttk import Entry
 
 
 class Window(tk.Tk):
-    """window"""
-
-    def __init__(self, name: str = 'Tkinter Window', size: tuple[int, int] | None = None):
-        """Creates a new window with the given name NAME and size SIZE
-
-        :arg name: str -> the name of the window
-        :arg size: tuple[int, int] | None -> the size of the window, if None the size is not set and automatically calculated by tkinter"""
+    def __init__(self, name: str = 'Tkinter Window', size: tuple[int, int] | None = (800, 600)):
         super().__init__()
         if size:
             super().geometry('{}x{}'.format(size[0], size[1]))
         super().title(name)
 
-
 class Toplevel(tk.Toplevel):
-    """toplevel"""
-
     def __init__(self, master: Window, name: str = 'Tkinter Toplevel', size: tuple[int, int] | None = None):
-        """Creates a Toplevel with parent MASTER, name NAME and size SIZE
-
-        :arg master: Window -> the parent of the toplevel
-        :arg name: str -> the name of the toplevel
-        :arg size: tuple[int, int] | None -> the size of the toplevel, if None the size is not set and automatically calculated by tkinter"""
         super().__init__(master)
         if size:
             super().geometry('{}x{}'.format(size[0], size[1]))
         super().title(name)
 
-
 class ConfirmWindow(Toplevel):
-    """confirm window that prompts the user to confirm their action or cancel it"""
-
     def __init__(self, master: Window, callback, name='Confirm Action', text='Confirm Action'):
-        """Creates a confirm window with parent MASTER and name NAME
-
-        :arg master: Window -> the parent of the toplevel
-        :arg name: str -> the name of the toplevel
-        :arg callback: callable -> the callback to call when user confirms
-        :arg text: str -> the text displayed within the confirm window to prompt the user what to do"""
         super().__init__(master, name=name, size=None)
         self.callback = callback
 
@@ -55,36 +34,20 @@ class ConfirmWindow(Toplevel):
         cancel.grid(row=1, column=1, sticky=tk.NSEW, padx=5, pady=5)
 
     def confirm(self):
-        """Confirms the action intended by the user, calls the user callback and destroys itself"""
         self.callback()
         self.destroy()
 
 
 class Section(tk.Frame):
-    """section"""
+    def __init__(self, master, header: str | None, size: Literal['h1', 'h2', 'h3'] | Literal[1, 2, 3] = 'h1',
+                 relief: Literal['raised', 'solid'] = 'raised'):
+        super().__init__(master)
+        self.header = SectionHeader(self, text=header, size=size, relief=relief)
 
-    def __init__(self, master,
-                 text: str = "Section",
-                 relief: Literal['sunken', 'solid', 'groove', 'raised', 'flat'] = 'flat',
-                 bd: int = 1,
-                 header_size: Literal['h1', 'h2', 'h3'] | int = 'h1',
-                 header_relief: Literal['solid', 'raised', 'flat'] = 'raised'):
-        """Creates a section with a header
-
-        :arg master: Widget -> the master of the section
-        :arg text: str -> the text displayed on the header
-        :arg relief: Literal['sunken', 'solid', 'groove', 'raised', 'flat'] -> the relief of the section
-        :arg bd: int -> the border depth of the section
-        :arg header_size: Literal['h1', 'h2', 'h3'] | int -> the size of the header font
-        :arg header_relief: Literal['solid', 'raised', 'flat'] -> the relief of the header"""
-        super().__init__(master, relief=relief, bd=bd)
-
-        self.isinner = isinstance(master, Section)
-
-        self.header = SectionHeader(self, text=text, size=header_size, relief=header_relief)
+        self.is_inner_section = isinstance(master, (Section | CollapsableSection))
 
     def pack(self):
-        if self.isinner:
+        if self.is_inner_section:
             super().pack(fill='both', padx=20, pady=(5, 15))
         else:
             super().pack(fill='both', padx=5, pady=(5, 15))
@@ -92,32 +55,89 @@ class Section(tk.Frame):
         self.header.pack()
         return self
 
+class CollapsableSection(tk.Frame):
+    def __init__(self, master, header: str | None, size: Literal['h1', 'h2', 'h3'] | Literal[1, 2, 3] = 'h1',
+                 relief: Literal['raised', 'solid'] = 'raised',
+                 collapsed: bool = False,
+                 on_collapse = None,):
+        super().__init__(master)
 
-class SectionHeader(tk.Label):
-    """header for sections"""
+        arrow_font = font.nametofont('TkDefaultFont')
+        arrow_font.configure(weight='bold')
 
-    def __init__(self, master,
-                 text: str = "Section",
-                 size: Literal['h1', 'h2', 'h3'] | int = 'h1',
-                 relief: Literal['solid', 'raised', 'flat'] = 'raised'):
-        """Creates a header for a section
+        self.header = SectionHeaderButton(self, text=header, command=self.collapse, size=size, relief=relief)
+        self.arrow = tk.Label(self, text='v', relief='flat', font=arrow_font, height=1)
 
-        :arg master: Section -> the master of the header
-        :arg text: str -> the text displayed on the header
-        :arg size: Literal['h1', 'h2', 'h3'] | int -> the size of the header font
-        :arg relief: Literal['solid', 'raised', 'flat'] -> the relief of the header"""
-        header_font = font.nametofont("TkDefaultFont").copy()
-        if size in ('h1', 1):
-            header_font.configure(weight='bold', size=14)
-        elif size in ('h2', 2):
-            header_font.configure(weight='bold', size=12)
-        else:
-            header_font.configure(size=12)
+        self.frame = tk.Frame(self) # frame for all the contents of the section
 
-        super().__init__(master, text=text, relief=relief, font=header_font)
+        self.is_inner_section = isinstance(master, (Section, CollapsableSection))
+        self.collapsed = collapsed
+        self.callback_on_collapse = on_collapse
+
+    def collapse(self):
+        if self.collapsed: # not collapsed
+            self.collapsed = False
+            self.arrow.configure(text='v')
+            self.pack_inner()
+        else: # collapsed
+            self.collapsed = True
+            self.arrow.configure(text='>')
+            self.frame.pack_forget()
+
+        if self.callback_on_collapse:
+            self.callback_on_collapse(self.collapsed)
+
+    def pack_inner(self):
+        self.frame.pack(fill='both')
+        return self.frame
 
     def pack(self):
-        super().pack(fill='both')
+        if self.is_inner_section:
+            super().pack(fill='both', padx=20, pady=(5, 15))
+        else:
+            super().pack(fill='both', padx=5, pady=(5, 15))
+
+        self.arrow.pack(fill='both', padx=(0,5), pady=3, side='right')
+        self.header.pack()
+
+        if not self.collapsed:
+            self.pack_inner()
+
+        return self
+
+
+class SectionHeader(tk.Label):
+    def __init__(self, master, text, size: Literal['h1', 'h2', 'h3'] | Literal[1, 2, 3] = 'h1',
+                 relief: Literal['raised', 'solid'] = tk.RAISED):
+        text_font = font.nametofont('TkDefaultFont').copy()
+        if size in ('h1', 1):
+            text_font.configure(weight='bold', size=14)
+        elif size in ('h2', 2):
+            text_font.configure(weight='bold', size=12)
+        elif size in ('h3', 3):
+            text_font.configure(size=12)
+
+        super().__init__(master, text=text, relief=relief, anchor='center', font=text_font)
+
+    def pack(self):
+        super().pack(fill='both', pady=5)
+        return self
+
+class SectionHeaderButton(tk.Button):
+    def __init__(self, master, text, command, size: Literal['h1', 'h2', 'h3'] | Literal[1, 2, 3] = 'h1',
+                 relief: Literal['raised', 'solid'] = tk.RAISED):
+        text_font = font.nametofont('TkDefaultFont').copy()
+        if size in ('h1', 1):
+            text_font.configure(weight='bold', size=14)
+        elif size in ('h2', 2):
+            text_font.configure(weight='bold', size=12)
+        elif size in ('h3', 3):
+            text_font.configure(size=12)
+
+        super().__init__(master, text=text, relief=relief, anchor='center', font=text_font, command=command)
+
+    def pack(self):
+        super().pack(fill='both', pady=5)
         return self
 
 
@@ -125,9 +145,8 @@ class Label(tk.Label):
     def __init__(self, master, text, relief: Literal["raised", "sunken", "flat", "ridge", "solid", "groove"] = "flat"):
         super().__init__(master, text=text, relief=relief, anchor='w')
 
-    def pack(self, side: Literal['left', 'right', 'top', 'bottom'] = 'left', **kwargs):
-        fill = 'y' if side in ('top', 'bottom') else 'x'
-        super().pack(fill=fill, pady=5, side=side, **kwargs)
+    def pack(self, side: Literal['left', 'right', 'top', 'bottom']='left'):
+        super().pack(fill='both', pady=5, side=side)
         return self
 
 
@@ -139,7 +158,6 @@ class Button(tk.Button):
     def pack(self):
         super().pack(fill='both', padx=5, pady=5)
         return self
-
 
 class ConfirmButton(tk.Button):
     def __init__(self, master, root, text, command,
@@ -207,34 +225,16 @@ class Path(tk.Frame):
         return self
 
 
-def _test():
-    root = Window(name='test')
+if __name__ == '__main__':
+    def method(collapsed: bool):
+        print('is collapsed?', collapsed)
 
-    info = {
-        "version": "0.1.2",
-        "credits": [
-            "fancypants (Michiel Eding)",
-            "no one"
-        ]
-    }
+    root = Window()
 
-    info_sect = Section(root, text='Info', relief='solid', bd=2).pack()
+    Section(root, 'Normal Section').pack()
 
-    version_frm = tk.Frame(info_sect)
-    Label(version_frm, text='Version').pack()
-    Label(version_frm, text=info["version"]).pack(side='right')
-    version_frm.pack(fill='x')
+    collapse_frame = CollapsableSection(root, 'Collapsable Section', on_collapse=method).pack().frame
+    Label(collapse_frame, text='THIS frame is COLLAPSABLE!!!').pack()
 
-    credits_sect = Section(info_sect, text="Credits", relief="flat", header_size='h3', header_relief='flat').pack()
-    for name in info["credits"]:
-        Label(credits_sect, text=name).pack(side='top')
-
-    misc_sect = Section(root, text='Miscellaneous', header_size='h2').pack()
-
-    Path(misc_sect, callback=lambda path: print("path selected:", path)).pack()
 
     root.mainloop()
-
-
-if __name__ == '__main__':
-    _test()
