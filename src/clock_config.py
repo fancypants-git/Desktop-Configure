@@ -124,7 +124,7 @@ def validate_schemas():
         else:
             print(f"Failed to load schema: {schema_id} {path}")
 
-def encode():
+def encode() -> dict:
     result: dict = {}
 
     widgets: list[dict]
@@ -179,9 +179,13 @@ def encode():
     return result
 
 
-def write_json(output: str):
-    with open(output, 'w') as f:
+def write_json(file: str):
+    with open(file, 'w') as f:
         json.dump(encode(), f, indent=4)
+
+def write_json_manual(file: str, output: dict):
+    with open(file, 'w') as f:
+        json.dump(output, f, indent=4)
 
 
 def load_json(path: str):
@@ -209,6 +213,36 @@ def load_json(path: str):
                         schema.set_value(element_settings, ekey, setting['value'], setting['type'])
 
 
+def initialize_clock_IDs(json_path: str):
+    # TODO:
+    # Get the widget ID from the schema
+    # Get the element IDs of the widget from the schema
+    # Load the JSON from the path and replace all IDs with the read IDs
+
+    settings = schema.get_settings(SCHEMAS[0])
+    widgets = settings.get_value('widgets') # gets all the widgets
+    widget_id = get_widget_id(widgets[0])
+    element_ids = [get_element_id(i, widget_id) for i in range(3)]
+
+    result: dict = {}
+    if os.path.isfile(json_path):
+        result = json.load(open(json_path))
+    else:
+        print(f"Failed to load json: {json_path}")
+        return
+
+    result['widgets'][0] = widget_id
+
+    print(result)
+
+    for i in range(3):
+        result['widgets'][widget_id]['elements'][i] = element_ids[i]
+
+    write_json_manual(json_path, result)
+
+
+
+
 
 if __name__ == '__main__':
     validate_schemas()
@@ -218,7 +252,8 @@ if __name__ == '__main__':
         print("2. Print Json")
         print("3. Write Json")
         print("4. Load Json")
-        print("5. Exit")
+        print("5. Initialize Clock IDs")
+        print("0. Exit")
         option = input("Select an option: ")
         print()
         if option == "1":
@@ -230,6 +265,8 @@ if __name__ == '__main__':
         elif option == "4":
             load_json(input("Path: "))
         elif option == "5":
+            initialize_clock_IDs(input("Path: "))
+        elif option == "0":
             break
 
         print()
