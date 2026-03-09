@@ -57,7 +57,7 @@ def main():
     # read the build settings from json "build-settings.json"
     build_settings: dict = {}
     try:
-        build_settings = json.load(open("build-settings.json"))
+        build_settings = json.load(open(os.path.join(os.path.dirname(__file__), 'build-settings.json')))
     except FileNotFoundError:
         logerr("File Not Found: build-settings.json!")
     except json.decoder.JSONDecodeError:

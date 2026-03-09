@@ -2,10 +2,10 @@
   "work-dir": "~/Coding/Desktop-Configure",
   "build-dir": "build",
   "source-dir": "src",
-  "keep-original-structure": true,
+  "keep-original-structure": false,
   "create-executable": true,
   "program-entry": "main.py",
   "misc-include": [
-    "config.json"
+    "src/config.json"
   ]
 }
